@@ -1,0 +1,81 @@
+---
+title: "Movie Ratings Analysis"
+author: "Tyler Graham"
+date: "2025-02-09"
+output: pdf_document
+---
+
+## Data 607 - Assignment 2.
+
+## Section 1, Survey
+
+I started by surveying 5 friends about 6 popular movies that I happen to love. I guess we plan to chart exactly how much my friends like my favorite formative movies. As you will see, my favorite movies are, in no particular order, Beetlejuice, Evil Dead 2, PeeWee's Big Adventure, Star Wars, The Princess Bride, and Stand By Me.
+
+## Section 2, SQL Database build
+
+Using MySQL Workbench we created a database with three pieces of data: movies, critics, ratings. Movie IDs were mapped to numbers 1-6. Critics were mapped to 1-5, and Ratings were already set as 1-5. Database can be pulled from: 
+
+```{r download-sql, echo=TRUE}
+# Download the SQL dump file from GitHub
+download.file("https://raw.githubusercontent.com/tcgraham-data/data-607-week-2/refs/heads/main/movie_ratings.sql", 
+              destfile = "movie_ratings.sql")
+```
+
+With the database made, it was time to move them into RStudio which required adding some R packages:
+
+```{r install-packages, eval=FALSE, echo=TRUE}
+# Install the required packages
+install.packages("DBI")
+install.packages("RMySQL")
+```
+
+```{r setup, include=FALSE}
+# Load necessary packages (assumes they are installed)
+library(DBI)
+library(RMySQL)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+With the packages added, we need to bring our data into R:
+
+```{r connect-and-load, echo=TRUE, message=FALSE, warning=FALSE}
+# Connect to the MySQL database
+con <- dbConnect(RMySQL::MySQL(),
+                 dbname = "movie_ratings",
+                 host = "localhost",
+                 user = "root",    
+                 password = "Holl@nd112914") # I haven't sorted yet how to get around the password protocol
+
+# Define the SQL query to join the tables
+query <- "
+SELECT m.title, c.critic_name, r.rating
+FROM ratings r
+JOIN movies m ON r.movie_id = m.movie_id
+JOIN critics c ON r.critic_id = c.critic_id;
+"
+
+# Retrieve the data from the database
+movie_ratings_df <- dbGetQuery(con, query)
+
+# Disconnect from the database
+dbDisconnect(con)
+
+# View the first few rows of the data frame
+head(movie_ratings_df)
+```
+
+And then let us plot how close my friends mirror my opinion about my favorite movies:
+
+```{r plot-critic-ratings, echo=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+
+# Plot one line per critic, with movie titles on the x-axis and ratings on the y-axis.
+ggplot(movie_ratings_df, aes(x = title, y = rating, group = critic_name, color = critic_name)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Movie Ratings by Critic",
+       x = "Movie",
+       y = "Rating") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
