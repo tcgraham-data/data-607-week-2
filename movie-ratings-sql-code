@@ -1,0 +1,93 @@
+-- Create the database (schema) and set it as the default
+CREATE DATABASE IF NOT EXISTS movie_ratings;
+USE movie_ratings;
+
+-- Create the 'movies' table
+CREATE TABLE IF NOT EXISTS movies (
+    movie_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL
+);
+
+-- Create the 'critics' table (renaming "raters" to "critics")
+CREATE TABLE IF NOT EXISTS critics (
+    critic_id INT AUTO_INCREMENT PRIMARY KEY,
+    critic_name VARCHAR(255) NOT NULL
+);
+
+-- Create the 'ratings' table that links movies and critics
+CREATE TABLE IF NOT EXISTS ratings (
+    movie_id INT,
+    critic_id INT,
+    rating TINYINT,  -- Ratings on a scale from 1 to 5 (we're using 2, 3, 4, 5)
+    PRIMARY KEY (movie_id, critic_id),
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id),
+    FOREIGN KEY (critic_id) REFERENCES critics(critic_id)
+);-- Insert six movies
+INSERT INTO movies (title) VALUES
+('Beetlejuice'),
+('Evil Dead 2'),
+('PeeWee''s Big Adventure'),
+('The Princess Bride'),
+('Stand By Me'),
+('Star Wars');
+INSERT INTO critics (critic_name) VALUES
+('Blake'),
+('Caroline'),
+('Jayson'),
+('Ashley'),
+('Nancy');
+
+-- Movie 1: Beetlejuice
+INSERT INTO ratings (movie_id, critic_id, rating) VALUES
+(1, 1, 5),   -- Blake
+(1, 2, 3),   -- Caroline
+(1, 3, 4),   -- Jayson
+(1, 4, 2),   -- Ashley
+(1, 5, 5);   -- Nancy
+
+-- Movie 2: Evil Dead 2
+INSERT INTO ratings (movie_id, critic_id, rating) VALUES
+(2, 1, 5),     -- Blake
+(2, 2, NULL),  -- Caroline did not see it
+(2, 3, NULL),  -- Jayson did not see it
+(2, 4, 3),     -- Ashley
+(2, 5, NULL);  -- Nancy did not see it
+
+-- Movie 3: PeeWee's Big Adventure
+INSERT INTO ratings (movie_id, critic_id, rating) VALUES
+(3, 1, 2),     -- Blake
+(3, 2, 5),     -- Caroline
+(3, 3, 4),     -- Jayson
+(3, 4, NULL),  -- Ashley did not see it
+(3, 5, 3);     -- Nancy
+
+-- Movie 4: The Princess Bride
+INSERT INTO ratings (movie_id, critic_id, rating) VALUES
+(4, 1, 5),    -- Blake
+(4, 2, 4),    -- Caroline
+(4, 3, 3),    -- Jayson
+(4, 4, 5),    -- Ashley
+(4, 5, 5);    -- Nancy
+
+-- Movie 5: Stand By Me
+INSERT INTO ratings (movie_id, critic_id, rating) VALUES
+(5, 1, 3),     -- Blake
+(5, 2, 5),     -- Caroline
+(5, 3, 2),     -- Jayson
+(5, 4, NULL),  -- Ashley did not see it
+(5, 5, 4);     -- Nancy
+
+-- Movie 6: Star Wars
+INSERT INTO ratings (movie_id, critic_id, rating) VALUES
+(6, 1, 4),    -- Blake
+(6, 2, 5),    -- Caroline
+(6, 3, 5),    -- Jayson
+(6, 4, 2),    -- Ashley
+(6, 5, 3);    -- Nancy
+
+INSERT IGNORE INTO ratings (movie_id, critic_id, rating) VALUES
+(1, 1, 5),
+(1, 2, 3),
+(1, 3, 4),
+(1, 4, 2),
+(1, 5, 5);
